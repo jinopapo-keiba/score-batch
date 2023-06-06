@@ -56,6 +56,14 @@ public class MainJob implements CommandLineRunner {
                     if (jikuFlag || betResult.isFirst()) {
                         chanceCount.addAndGet(1);
                     }
+                    if(chanceCount.get() % 100 == 0) {
+                        log.info("単勝的中率:" + (double) tanshouCount.get()/ verifyRaces.size());
+                        log.info("副賞的中率:" + (double) hukuhyouCount.get()/ verifyRaces.size());
+                        log.info("馬連的中率:" + (double) umarenCount.get()/ verifyRaces.size());
+                        log.info("ワイド的中率:" + (double) waidoCount.get()/ verifyRaces.size());
+                        log.info("３連複的中率:" + (double) sanrenpukuCount.get()/ verifyRaces.size());
+                        log.info("単勝可能性:" + (double) chanceCount.get()/ verifyRaces.size());
+                    }
                 }
         );
 
