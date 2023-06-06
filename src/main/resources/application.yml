@@ -1,0 +1,13 @@
+spring:
+  dataSource:
+    driverClassName: com.mysql.jdbc.Driver
+    url: jdbc:mysql://localhost/keiba
+    username: ji-no
+server:
+  port: 8081
+logging:
+  level:
+    org:
+      springframework: WARN
+mybatis:
+  configLocation: classpath:/mybatis/mybatis-config.xml
