@@ -25,13 +25,9 @@ public class BetService {
         List<HorseScore> scores = scoreRepository.fetchScore(raceId);
 
         List<HorseScore> sortedScores = scores.stream().sorted(Comparator.comparingInt(HorseScore::getScore).reversed()).toList();
-        HorseScore maxScores = scores.stream().sorted(Comparator.comparingInt(HorseScore::getMaxScore).reversed()).toList().get(0);
         HorseScore topHorseScores = sortedScores.get(0);
-        List<HorseScore> prizeHorseScores = new ArrayList<>();
-        prizeHorseScores.addAll(sortedScores.subList(1,sortedScores.size() <= 10 ? 4 : 6));
-        if(maxScores.getHorseId() != topHorseScores.getHorseId()) {
-            prizeHorseScores.add(prizeHorseScores.size()-1,maxScores);
-        }
+        List<HorseScore> prizeHorseScores = new ArrayList<>(sortedScores.subList(0, sortedScores.size() <= 10 ? 4 : 6));
+
 
         Race race = raceRepository.fetchRace(raceId);
         AtomicBoolean jikuFirstFlag = new AtomicBoolean(false);
@@ -46,22 +42,22 @@ public class BetService {
                 if(ranking == 1) {
                     jikuFirstFlag.set(raceHorse.getHorse().getId() == topHorseScores.getHorseId());
                     firstFlag.set(prizeHorseScores.stream().anyMatch(((prizeHorseScore) -> prizeHorseScore.getHorseId() == raceHorse.getHorse().getId())));
-                    if(jikuFirstFlag.get() || firstFlag.get()) {
-                        log.info("1着"+raceHorse.getHorse().getName()+jikuFirstFlag.get());
+                    if (!jikuFirstFlag.get()) {
+                        firstFlag.get();
                     }
                 }
                 if (ranking == 2) {
                     jikuSecondFlag.set(raceHorse.getHorse().getId() == topHorseScores.getHorseId());
                     secondFlag.set(prizeHorseScores.stream().anyMatch(((prizeHorseScore) -> prizeHorseScore.getHorseId() == raceHorse.getHorse().getId())));
-                    if(jikuSecondFlag.get() || secondFlag.get()) {
-                        log.info("2着"+raceHorse.getHorse().getName()+jikuSecondFlag.get());
+                    if (!jikuSecondFlag.get()) {
+                        secondFlag.get();
                     }
                 }
                 if (ranking == 3) {
                     jikuThirdFlag.set(raceHorse.getHorse().getId() == topHorseScores.getHorseId());
                     thirdFlag.set(prizeHorseScores.stream().anyMatch(((prizeHorseScore) -> prizeHorseScore.getHorseId() == raceHorse.getHorse().getId())));
-                    if(jikuThirdFlag.get() || thirdFlag.get()) {
-                        log.info("3着"+raceHorse.getHorse().getName()+jikuThirdFlag);
+                    if (!jikuThirdFlag.get()) {
+                        thirdFlag.get();
                     }
                 }
             }

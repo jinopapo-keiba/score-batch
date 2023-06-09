@@ -20,7 +20,7 @@ public class MainJob implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        List<Integer> verifyRaces = raceRepository.fetchAllRace();
+        List<Integer> verifyRaces = raceRepository.fetchAllRace().subList(0,100);
 
         AtomicInteger tanshouCount = new AtomicInteger();
         AtomicInteger umarenCount = new AtomicInteger();
@@ -34,23 +34,18 @@ public class MainJob implements CommandLineRunner {
                     boolean jikuFlag = betResult.isJikuFirst() || betResult.isJikuSecond() || betResult.isJikuThird();
                     if (betResult.isJikuFirst()) {
                         tanshouCount.addAndGet(1);
-                        log.info("単勝");
                     }
                     if ((betResult.isJikuFirst() || betResult.isJikuSecond()) && (betResult.isFirst() || betResult.isSecond())) {
                         umarenCount.addAndGet(1);
-                        log.info("馬連");
                     }
                     if (jikuFlag) {
                         hukuhyouCount.addAndGet(1);
-                        log.info("副賞");
                         if (betResult.isFirst() || betResult.isSecond() || betResult.isThird()) {
-                            log.info("ワイド");
                             waidoCount.addAndGet(1);
                         }
 
                         if ((betResult.isFirst() && betResult.isSecond()) || (betResult.isFirst() && betResult.isThird()) || (betResult.isSecond() && betResult.isThird())) {
                             sanrenpukuCount.addAndGet(1);
-                            log.info("３連複");
                         }
                     }
                     if (jikuFlag || betResult.isFirst()) {
