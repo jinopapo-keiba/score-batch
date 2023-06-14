@@ -30,7 +30,7 @@ public class RaceRepository {
 
     public List<Integer> fetchAllRace() {
         RestTemplate restTemplate = restTemplateBuilder.build();
-        ResponseEntity<List<Integer>> response = restTemplate.exchange("http://localhost:8080/v1/race/all", HttpMethod.GET,null, new ParameterizedTypeReference<>() {});
+        ResponseEntity<List<Integer>> response = restTemplate.exchange("http://localhost:8080/v1/race/all?testFlag=true", HttpMethod.GET,null, new ParameterizedTypeReference<>() {});
 
         return response.getBody();
     }

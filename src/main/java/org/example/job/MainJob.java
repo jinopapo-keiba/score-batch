@@ -20,7 +20,7 @@ public class MainJob implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        List<Integer> verifyRaces = raceRepository.fetchAllRace().subList(0,100);
+        List<Integer> verifyRaces = raceRepository.fetchAllRace();
 
         AtomicInteger tanshouCount = new AtomicInteger();
         AtomicInteger umarenCount = new AtomicInteger();
