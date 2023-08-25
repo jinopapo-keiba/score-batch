@@ -29,7 +29,9 @@ public class MainJob implements CommandLineRunner {
         AtomicInteger sanrenpukuCount = new AtomicInteger();
         AtomicInteger chanceCount = new AtomicInteger();
 
-        verifyRaces.forEach((verifyRace) -> {
+        verifyRaces
+                .parallelStream()
+                .forEach((verifyRace) -> {
                     BetResult betResult = betService.calcPaymentPrice(verifyRace);
                     boolean jikuFlag = betResult.isJikuFirst() || betResult.isJikuSecond() || betResult.isJikuThird();
                     if (betResult.isJikuFirst()) {

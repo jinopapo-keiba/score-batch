@@ -26,7 +26,7 @@ public class BetService {
 
         List<HorseScore> sortedScores = scores.stream().sorted(Comparator.comparingInt(HorseScore::getScore).reversed()).toList();
         HorseScore topHorseScores = sortedScores.get(0);
-        List<HorseScore> prizeHorseScores = new ArrayList<>(sortedScores.subList(0, sortedScores.size() <= 10 ? 4 : 6));
+        List<HorseScore> prizeHorseScores = new ArrayList<>(sortedScores.subList(0, 5));
 
 
         Race race = raceRepository.fetchRace(raceId);
@@ -37,6 +37,9 @@ public class BetService {
         AtomicBoolean secondFlag = new AtomicBoolean(false);
         AtomicBoolean thirdFlag = new AtomicBoolean(false);
         race.getRaceHorses().forEach((raceHorse -> {
+            if (raceHorse.getRaceResult() == null) {
+                return;
+            }
             int ranking =raceHorse.getRaceResult().getRanking();
             if (ranking <= 3) {
                 if(ranking == 1) {
