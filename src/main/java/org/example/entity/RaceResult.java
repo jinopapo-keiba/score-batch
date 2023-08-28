@@ -15,6 +15,7 @@ public class RaceResult {
     Duration fullTime;
     Integer ranking;
     String cornerRanking;
+    Integer popular;
     Duration lastRapTime;
     Duration meanFullTime;
     Duration meanLastRapTime;

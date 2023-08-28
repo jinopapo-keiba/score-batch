@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.example.entity.BetResult;
 import org.example.entity.HorseScore;
 import org.example.entity.Race;
+import org.example.entity.RaceHorse;
 import org.example.repository.RaceRepository;
 import org.example.repository.ScoreRepository;
 import org.springframework.stereotype.Service;
@@ -23,13 +24,16 @@ public class BetService {
 
     public BetResult calcPaymentPrice(int raceId) {
         List<HorseScore> scores = scoreRepository.fetchScore(raceId);
+        Race race = raceRepository.fetchRace(raceId);
 
         List<HorseScore> sortedScores = scores.stream().sorted(Comparator.comparingInt(HorseScore::getScore).reversed()).toList();
         HorseScore topHorseScores = sortedScores.get(0);
-        List<HorseScore> prizeHorseScores = new ArrayList<>(sortedScores.subList(0, 5));
+        List<HorseScore> prizeHorseScores = new ArrayList<>(sortedScores.subList(1, Math.min(race.getRaceHorses().size(),6)));
 
 
-        Race race = raceRepository.fetchRace(raceId);
+        AtomicBoolean popularFirstFlag = new AtomicBoolean(false);
+        AtomicBoolean popularSecondFlag = new AtomicBoolean(false);
+        AtomicBoolean popularThirdFlag = new AtomicBoolean(false);
         AtomicBoolean jikuFirstFlag = new AtomicBoolean(false);
         AtomicBoolean jikuSecondFlag = new AtomicBoolean(false);
         AtomicBoolean jikuThirdFlag = new AtomicBoolean(false);
@@ -45,30 +49,34 @@ public class BetService {
                 if(ranking == 1) {
                     jikuFirstFlag.set(raceHorse.getHorse().getId() == topHorseScores.getHorseId());
                     firstFlag.set(prizeHorseScores.stream().anyMatch(((prizeHorseScore) -> prizeHorseScore.getHorseId() == raceHorse.getHorse().getId())));
-                    if (!jikuFirstFlag.get()) {
-                        firstFlag.get();
+                    if (raceHorse.getRaceResult().getPopular() != null && raceHorse.getRaceResult().getPopular() == 1) {
+                        popularFirstFlag.set(true);
                     }
                 }
                 if (ranking == 2) {
                     jikuSecondFlag.set(raceHorse.getHorse().getId() == topHorseScores.getHorseId());
                     secondFlag.set(prizeHorseScores.stream().anyMatch(((prizeHorseScore) -> prizeHorseScore.getHorseId() == raceHorse.getHorse().getId())));
-                    if (!jikuSecondFlag.get()) {
-                        secondFlag.get();
+                    if (raceHorse.getRaceResult().getPopular() != null && raceHorse.getRaceResult().getPopular() == 1) {
+                        popularSecondFlag.set(true);
                     }
                 }
                 if (ranking == 3) {
                     jikuThirdFlag.set(raceHorse.getHorse().getId() == topHorseScores.getHorseId());
                     thirdFlag.set(prizeHorseScores.stream().anyMatch(((prizeHorseScore) -> prizeHorseScore.getHorseId() == raceHorse.getHorse().getId())));
-                    if (!jikuThirdFlag.get()) {
-                        thirdFlag.get();
+                    if (raceHorse.getRaceResult().getPopular() != null && raceHorse.getRaceResult().getPopular() == 1) {
+                        popularThirdFlag.set(true);
                     }
                 }
             }
+
         }) );
        return BetResult.builder()
                .jikuFirst(jikuFirstFlag.get())
                .jikuSecond(jikuSecondFlag.get())
                .jikuThird(jikuThirdFlag.get())
+               .popularFirst(popularFirstFlag.get())
+               .popularSecond(popularSecondFlag.get())
+               .popularThird(popularThirdFlag.get())
                .first(firstFlag.get())
                .second(secondFlag.get())
                .third(thirdFlag.get())
