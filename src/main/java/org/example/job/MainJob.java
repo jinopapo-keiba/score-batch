@@ -65,9 +65,9 @@ public class MainJob implements CommandLineRunner {
                     }
                     if(betResult.isPopularFirst() || betResult.isPopularSecond()) {
                         popularRentaiCount.addAndGet(1);
-                        if(betResult.isPopularThird()) {
-                            popularHukuhyouCount.addAndGet(1);
-                        }
+                    }
+                    if(betResult.isPopularFirst() || betResult.isPopularSecond() || betResult.isPopularThird()){
+                        popularHukuhyouCount.addAndGet(1);
                     }
                     if(chanceCount.get() % 100 == 0) {
                         log.info("単勝的中率:" + (double) tanshouCount.get()/ verifyRaces.size());
