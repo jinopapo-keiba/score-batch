@@ -26,7 +26,7 @@ public class BetService {
         List<HorseScore> scores = scoreRepository.fetchScore(raceId);
         Race race = raceRepository.fetchRace(raceId);
 
-        List<HorseScore> sortedScores = scores.stream().sorted(Comparator.comparingInt(HorseScore::getScore).reversed()).toList();
+        List<HorseScore> sortedScores = scores.stream().sorted(Comparator.comparingDouble(HorseScore::getScore).reversed()).toList();
         HorseScore topHorseScores = sortedScores.get(0);
         List<HorseScore> prizeHorseScores = new ArrayList<>(sortedScores.subList(1, Math.min(race.getRaceHorses().size(),6)));
 
@@ -47,22 +47,22 @@ public class BetService {
             int ranking =raceHorse.getRaceResult().getRanking();
             if (ranking <= 3) {
                 if(ranking == 1) {
-                    jikuFirstFlag.set(raceHorse.getHorse().getId() == topHorseScores.getHorseId());
-                    firstFlag.set(prizeHorseScores.stream().anyMatch(((prizeHorseScore) -> prizeHorseScore.getHorseId() == raceHorse.getHorse().getId())));
+                    jikuFirstFlag.set(jikuFirstFlag.get() || raceHorse.getHorse().getId() == topHorseScores.getHorseId());
+                    firstFlag.set(firstFlag.get() || prizeHorseScores.stream().anyMatch(((prizeHorseScore) -> prizeHorseScore.getHorseId() == raceHorse.getHorse().getId())));
                     if (raceHorse.getRaceResult().getPopular() != null && raceHorse.getRaceResult().getPopular() == 1) {
                         popularFirstFlag.set(true);
                     }
                 }
                 if (ranking == 2) {
-                    jikuSecondFlag.set(raceHorse.getHorse().getId() == topHorseScores.getHorseId());
-                    secondFlag.set(prizeHorseScores.stream().anyMatch(((prizeHorseScore) -> prizeHorseScore.getHorseId() == raceHorse.getHorse().getId())));
+                    jikuSecondFlag.set(jikuSecondFlag.get() || raceHorse.getHorse().getId() == topHorseScores.getHorseId());
+                    secondFlag.set(secondFlag.get() ||  prizeHorseScores.stream().anyMatch(((prizeHorseScore) -> prizeHorseScore.getHorseId() == raceHorse.getHorse().getId())));
                     if (raceHorse.getRaceResult().getPopular() != null && raceHorse.getRaceResult().getPopular() == 1) {
                         popularSecondFlag.set(true);
                     }
                 }
                 if (ranking == 3) {
-                    jikuThirdFlag.set(raceHorse.getHorse().getId() == topHorseScores.getHorseId());
-                    thirdFlag.set(prizeHorseScores.stream().anyMatch(((prizeHorseScore) -> prizeHorseScore.getHorseId() == raceHorse.getHorse().getId())));
+                    jikuThirdFlag.set(jikuThirdFlag.get() || raceHorse.getHorse().getId() == topHorseScores.getHorseId());
+                    thirdFlag.set(thirdFlag.get() || prizeHorseScores.stream().anyMatch(((prizeHorseScore) -> prizeHorseScore.getHorseId() == raceHorse.getHorse().getId())));
                     if (raceHorse.getRaceResult().getPopular() != null && raceHorse.getRaceResult().getPopular() == 1) {
                         popularThirdFlag.set(true);
                     }

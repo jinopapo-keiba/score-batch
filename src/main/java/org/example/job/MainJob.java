@@ -32,6 +32,9 @@ public class MainJob implements CommandLineRunner {
         AtomicInteger popularTanshouCount = new AtomicInteger();
         AtomicInteger popularHukuhyouCount = new AtomicInteger();
         AtomicInteger popularRentaiCount = new AtomicInteger();
+        AtomicInteger notPopularTanshouCount = new AtomicInteger();
+        AtomicInteger notPopularHukuhyouCount = new AtomicInteger();
+        AtomicInteger notPopularRentaiCount = new AtomicInteger();
 
         verifyRaces
                 .parallelStream()
@@ -69,6 +72,15 @@ public class MainJob implements CommandLineRunner {
                     if(betResult.isPopularFirst() || betResult.isPopularSecond() || betResult.isPopularThird()){
                         popularHukuhyouCount.addAndGet(1);
                     }
+                    if(!betResult.isPopularFirst() && betResult.isJikuFirst()) {
+                        notPopularTanshouCount.addAndGet(1);
+                    }
+                    if(!(betResult.isPopularFirst() || betResult.isPopularSecond()) && (betResult.isJikuFirst() || betResult.isJikuSecond())) {
+                        notPopularRentaiCount.addAndGet(1);
+                    }
+                    if(!(betResult.isPopularFirst() || betResult.isPopularSecond() || betResult.isPopularThird()) && (betResult.isJikuFirst() || betResult.isJikuSecond() || betResult.isJikuThird())){
+                        notPopularHukuhyouCount.addAndGet(1);
+                    }
                     if(chanceCount.get() % 100 == 0) {
                         log.info("単勝的中率:" + (double) tanshouCount.get()/ verifyRaces.size());
                         log.info("連対率:" + (double) rentaiCount.get()/ verifyRaces.size());
@@ -86,14 +98,17 @@ public class MainJob implements CommandLineRunner {
 
         log.info("合計:" + verifyRaces.size());
         log.info("単勝的中率:" + (double) tanshouCount.get()/ verifyRaces.size());
+        log.info("1番人気以外単勝的中率:" + (double) notPopularTanshouCount.get()/ verifyRaces.size());
+        log.info("1番人気単勝的中率:" + (double) popularTanshouCount.get()/ verifyRaces.size());
         log.info("連対率:" + (double) rentaiCount.get()/ verifyRaces.size());
+        log.info("1番人気以外連対率:" + (double) notPopularRentaiCount.get()/ verifyRaces.size());
+        log.info("1番人気連対率:" + (double) popularRentaiCount.get()/ verifyRaces.size());
         log.info("副賞的中率:" + (double) hukuhyouCount.get()/ verifyRaces.size());
+        log.info("1番人気以外副賞的中率:" + (double) notPopularHukuhyouCount.get()/ verifyRaces.size());
+        log.info("1番人気副賞的中率:" + (double) popularHukuhyouCount.get()/ verifyRaces.size());
         log.info("馬連的中率:" + (double) umarenCount.get()/ verifyRaces.size());
         log.info("ワイド的中率:" + (double) waidoCount.get()/ verifyRaces.size());
         log.info("３連複的中率:" + (double) sanrenpukuCount.get()/ verifyRaces.size());
-        log.info("1番人気単勝的中率:" + (double) popularTanshouCount.get()/ verifyRaces.size());
-        log.info("1番人気連対率:" + (double) popularRentaiCount.get()/ verifyRaces.size());
-        log.info("1番人気副賞的中率:" + (double) popularHukuhyouCount.get()/ verifyRaces.size());
         log.info("単勝可能性:" + (double) chanceCount.get()/ verifyRaces.size());
     }
 }
