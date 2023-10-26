@@ -6,5 +6,5 @@ import lombok.Data;
 public class HorseScore {
     int horseId;
     String horseName;
-    float score;
+    double score;
 }

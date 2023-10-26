@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.example.entity.BetResult;
 import org.example.entity.HorseScore;
 import org.example.entity.Race;
-import org.example.entity.RaceHorse;
 import org.example.repository.RaceRepository;
 import org.example.repository.ScoreRepository;
 import org.springframework.stereotype.Service;

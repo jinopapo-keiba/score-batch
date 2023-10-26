@@ -57,7 +57,7 @@ public class MainJob implements CommandLineRunner {
                             sanrenpukuCount.addAndGet(1);
                         }
                     }
-                    if (jikuFlag || betResult.isFirst()) {
+                    if (betResult.isJikuFirst() || betResult.isFirst()) {
                         chanceCount.addAndGet(1);
                     }
                     if(betResult.isJikuFirst() || betResult.isJikuSecond()) {
