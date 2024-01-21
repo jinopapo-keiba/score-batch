@@ -15,4 +15,5 @@ public class BetResult {
     boolean first;
     boolean second;
     boolean third;
+    boolean confident;
 }

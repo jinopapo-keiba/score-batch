@@ -7,6 +7,7 @@ import org.example.entity.HorseScore;
 import org.example.entity.Race;
 import org.example.repository.RaceRepository;
 import org.example.repository.ScoreRepository;
+import org.example.repository.dto.HorseScoreResponse;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -22,7 +23,8 @@ public class BetService {
     private final RaceRepository raceRepository;
 
     public BetResult calcPaymentPrice(int raceId) {
-        List<HorseScore> scores = scoreRepository.fetchScore(raceId);
+        HorseScoreResponse scoreResponse = scoreRepository.fetchScore(raceId);
+        List<HorseScore> scores = scoreResponse.getScores();
         Race race = raceRepository.fetchRace(raceId);
 
         List<HorseScore> sortedScores = scores.stream().sorted(Comparator.comparingDouble(HorseScore::getScore).reversed()).toList();
@@ -43,7 +45,7 @@ public class BetService {
             if (raceHorse.getRaceResult() == null) {
                 return;
             }
-            int ranking =raceHorse.getRaceResult().getRanking();
+            int ranking = raceHorse.getRaceResult().getRanking();
             if (ranking <= 3) {
                 if(ranking == 1) {
                     jikuFirstFlag.set(jikuFirstFlag.get() || raceHorse.getHorse().getId() == topHorseScores.getHorseId());
@@ -79,6 +81,7 @@ public class BetService {
                .first(firstFlag.get())
                .second(secondFlag.get())
                .third(thirdFlag.get())
+               .confident(scoreResponse.getConfident().isConfidentFlag())
                .build();
     }
 }
