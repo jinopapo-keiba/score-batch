@@ -38,7 +38,7 @@ public class MainJob implements CommandLineRunner {
                 }
         );
 
-        Map<String,List<BetResult>> resultMap = new HashMap<>();
+        Map<String,List<BetResult>> resultMap = new TreeMap<>();
         results.forEach( result -> {
             for (Map.Entry<String,BetResult> resultEntry :result.entrySet()) {
                 resultMap.computeIfAbsent(resultEntry.getKey(), k -> new ArrayList<>()).add(resultEntry.getValue());
