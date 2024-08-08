@@ -24,7 +24,7 @@ public class ScoreRepository {
        RestTemplate restTemplate = restTemplateBuilder.build();
        Map<String,Object> param = new HashMap<>();
        param.put("raceId",raceId);
-       ResponseEntity<List<HorseScoreResponse>> response = restTemplate.exchange("http://localhost:8888/v1/score?raceId="+ raceId, HttpMethod.GET,null, new ParameterizedTypeReference<>() {},param);
-       return Objects.requireNonNull(response.getBody()).get(0);
+       ResponseEntity<HorseScoreResponse> response = restTemplate.exchange("http://localhost:8888/v1/score?raceId="+ raceId, HttpMethod.GET,null, new ParameterizedTypeReference<>() {},param);
+       return Objects.requireNonNull(response.getBody());
    }
 }
