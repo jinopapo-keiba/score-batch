@@ -6,9 +6,12 @@ import org.example.entity.*;
 import org.example.repository.RaceRepository;
 import org.example.repository.ScoreRepository;
 import org.example.repository.dto.HorseScoreResponse;
+import org.example.valueobject.OldLimit;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @AllArgsConstructor
@@ -25,23 +28,24 @@ public class BetService {
         List<RaceHorse> raceHorses = race.getRaceHorses();
 
         Map<String,BetResult> results = new HashMap<>();
-        results.put("最大スコア",judgeTanshou(raceHorses,betMaxScore(raceHorses,scores)));
-        results.put("最大スコア(買い)", confident.isBuyFlag() ? judgeTanshou(raceHorses,betMaxScore(raceHorses,scores)) : null);
-        results.put("最大スコア(自信)", confident.isConfidentFlag() ? judgeTanshou(raceHorses,betMaxScore(raceHorses,scores)) : null);
-        results.put("最大スコア(カオス)", confident.isChaosFlag() ? judgeTanshou(raceHorses,betMaxScore(raceHorses,scores)) : null);
-        results.put("Best3スコア",judgeTanshou(raceHorses,betBest3Score(raceHorses,scores)));
-        results.put("Best3スコア(買い)", confident.isBuyFlag() ? judgeTanshou(raceHorses,betBest3Score(raceHorses,scores)) : null);
-        results.put("Best3スコア(自信)", confident.isConfidentFlag() ? judgeTanshou(raceHorses,betBest3Score(raceHorses,scores)) : null);
-        results.put("Best3スコア(カオス)", confident.isChaosFlag() ? judgeTanshou(raceHorses,betBest3Score(raceHorses,scores)) : null);
-        results.put("最大期待値",judgeTanshou(raceHorses,betMaxExpect(raceHorses,scores)));
-        results.put("最大期待値(買い)", confident.isBuyFlag() ? judgeTanshou(raceHorses,betMaxExpect(raceHorses,scores)) : null);
-        results.put("最大期待値(自信)", confident.isConfidentFlag() ? judgeTanshou(raceHorses,betMaxExpect(raceHorses,scores)) : null);
-        results.put("最大期待値(カオス)", confident.isChaosFlag() ? judgeTanshou(raceHorses,betMaxExpect(raceHorses,scores)) : null);
-        results.put("期待値1以上",judgeTanshou(raceHorses,betExpectOverOne(raceHorses,scores)));
-        results.put("期待値1以上(買い)", confident.isBuyFlag() ? judgeTanshou(raceHorses,betExpectOverOne(raceHorses,scores)) : null);
-        results.put("期待値1以上(自信)", confident.isConfidentFlag() ? judgeTanshou(raceHorses,betExpectOverOne(raceHorses,scores)) : null);
-        results.put("期待値1以上(カオス)", confident.isChaosFlag() ? judgeTanshou(raceHorses,betExpectOverOne(raceHorses,scores)) : null);
-
+        results = mergeMap(results,betRace("単勝：最大スコア",judgeTanshou(raceHorses,betMaxScore(raceHorses,scores)),confident,race));
+        results = mergeMap(results,betRace("単勝：Best3スコア",judgeTanshou(raceHorses,betBest3Score(raceHorses,scores)),confident,race));
+        results = mergeMap(results,betRace("単勝：期待値1以上",judgeTanshou(raceHorses,betExpectOver(raceHorses,scores,1)),confident,race));
+        results = mergeMap(results,betRace("単勝：期待値1.5以上",judgeTanshou(raceHorses,betExpectOver(raceHorses,scores,1.5F)),confident,race));
+        results = mergeMap(results,betRace("単勝：期待値2以上",judgeTanshou(raceHorses,betExpectOver(raceHorses,scores,2)),confident,race));
+        results = mergeMap(results,betRace("単勝：最大期待値",judgeTanshou(raceHorses,betMaxExpect(raceHorses,scores,1)),confident,race));
+        results = mergeMap(results,betRace("単勝：最大期待値(1.5)",judgeTanshou(raceHorses,betMaxExpect(raceHorses,scores,1.5F)),confident,race));
+        results = mergeMap(results,betRace("単勝：最大期待値(2)",judgeTanshou(raceHorses,betMaxExpect(raceHorses,scores,2)),confident,race));
+        results = mergeMap(results,betRace("複勝：最大スコア",judgeHukushou(raceHorses,betMaxScore(raceHorses,scores),race.getPayouts()),confident,race));
+        results = mergeMap(results,betRace("複勝：最大期待値",judgeHukushou(raceHorses,betMaxExpect(raceHorses,scores,1),race.getPayouts()),confident,race));
+        results = mergeMap(results,betRace("複勝：最大期待値(1.5)",judgeHukushou(raceHorses,betMaxExpect(raceHorses,scores,1.5F),race.getPayouts()),confident,race));
+        results = mergeMap(results,betRace("複勝：最大期待値(2)",judgeHukushou(raceHorses,betMaxExpect(raceHorses,scores,2),race.getPayouts()),confident,race));
+        results = mergeMap(results,betRace("ワイド：軸：最大スコア 紐：最大期待値",judgeWide(raceHorses,betMaxScore(raceHorses,scores),betMaxExpect(raceHorses,scores,1),race.getPayouts()),confident,race));
+        results = mergeMap(results,betRace("ワイド：軸：最大スコア 紐：最大期待値(1.5)",judgeWide(raceHorses,betMaxScore(raceHorses,scores),betMaxExpect(raceHorses,scores,1.5F),race.getPayouts()),confident,race));
+        results = mergeMap(results,betRace("ワイド：軸：最大スコア 紐：最大期待値(2)",judgeWide(raceHorses,betMaxScore(raceHorses,scores),betMaxExpect(raceHorses,scores,2),race.getPayouts()),confident,race));
+        results = mergeMap(results,betRace("ワイド：軸：最大スコア 紐：期待値1以上",judgeWide(raceHorses,betMaxScore(raceHorses,scores),betExpectOver(raceHorses,scores,1),race.getPayouts()),confident,race));
+        results = mergeMap(results,betRace("ワイド：軸：最大スコア 紐：期待値1.5以上",judgeWide(raceHorses,betMaxScore(raceHorses,scores),betExpectOver(raceHorses,scores,1.5F),race.getPayouts()),confident,race));
+        results = mergeMap(results,betRace("ワイド：軸：最大スコア 紐：期待値2以上)",judgeWide(raceHorses,betMaxScore(raceHorses,scores),betExpectOver(raceHorses,scores,2),race.getPayouts()),confident,race));
         return results;
     }
 
@@ -50,10 +54,16 @@ public class BetService {
             return null;
         }
 
-        RaceHorse topHorse = raceHorses.stream()
+        List<RaceHorse> topHorses = raceHorses.stream()
                 .filter(raceHorse -> raceHorse.getRaceResult() != null)
                 .filter(raceHorse -> raceHorse.getRaceResult().getRanking() == 1)
-                .toList().get(0);
+                .toList();
+
+        if(topHorses.isEmpty()) {
+            return null;
+        }
+
+        RaceHorse topHorse = topHorses.get(0);
 
         if(betHorseIds.contains(topHorse.getHorse().getId())) {
             return BetResult
@@ -67,6 +77,105 @@ public class BetService {
                     .payout(0)
                     .build();
         }
+    }
+
+    private BetResult judgeHukushou(List<RaceHorse> raceHorses, List<Integer> betHorseIds,List<Payout> payouts) {
+        if (betHorseIds.isEmpty()) {
+            return null;
+        }
+
+        List<Integer> betFrameNumber = betHorseIds.stream().map(
+                betHorseId -> raceHorses.stream().filter(raceHorse -> Objects.equals(raceHorse.getHorse().getId(), betHorseId)).findFirst().get().getFrameNumber())
+                .toList();
+
+        List<Payout> hitPayouts = payouts.stream()
+                .filter(payout -> payout.getBetType().equals("複勝"))
+                .filter(payout -> betFrameNumber.contains(Integer.valueOf(payout.getFrameNumber())))
+                .toList();
+        if(hitPayouts.isEmpty()) {
+            return BetResult.builder()
+                    .payout(0)
+                    .hit(false)
+                    .build();
+        } else {
+            Float payout = hitPayouts.stream()
+                    .map(payout1 -> payout1.getPayout() / 100 / betFrameNumber.size())
+                    .reduce(Float::sum).get();
+            return BetResult.builder()
+                    .payout(payout)
+                    .hit(true)
+                    .build();
+        }
+    }
+
+    private BetResult judgeWide(List<RaceHorse> raceHorses, List<Integer> jikuBetHorseIds,List<Integer> himoBetHorseIds,List<Payout> payouts) {
+        if (jikuBetHorseIds.isEmpty() || himoBetHorseIds.isEmpty()) {
+            return null;
+        }
+
+        List<Integer> jikuFrameNumber = jikuBetHorseIds.stream().map(
+                        betHorseId -> raceHorses.stream().filter(raceHorse -> Objects.equals(raceHorse.getHorse().getId(), betHorseId)).findFirst().get().getFrameNumber())
+                .toList();
+        List<Integer> himoFrameNumber = himoBetHorseIds.stream().map(
+                        betHorseId -> raceHorses.stream().filter(raceHorse -> Objects.equals(raceHorse.getHorse().getId(), betHorseId)).findFirst().get().getFrameNumber())
+                .toList();
+
+        List<Payout> hitPayouts = payouts.stream()
+                .filter(payout -> payout.getBetType().equals("ワイド"))
+                .filter(payout -> {
+                    List<Integer> hitFrameNumbers = Arrays.stream(payout.getFrameNumber().split("-"))
+                            .map(Integer::valueOf).toList();
+
+                    Boolean jikuHit = hitFrameNumbers.stream()
+                            .map(jikuFrameNumber::contains)
+                            .reduce(Boolean::logicalOr).get();
+
+                    Boolean himoHit = hitFrameNumbers.stream()
+                            .map(himoFrameNumber::contains)
+                            .reduce(Boolean::logicalOr).get();
+
+                    return jikuHit && himoHit;
+                })
+                .toList();
+        if(hitPayouts.isEmpty()) {
+            return BetResult.builder()
+                    .payout(0)
+                    .hit(false)
+                    .build();
+        } else {
+            Float payout = hitPayouts.stream()
+                    .map(payout1 -> payout1.getPayout()/100 / (jikuFrameNumber.size() * himoFrameNumber.size()))
+                    .reduce(Float::sum).get();
+            return BetResult.builder()
+                    .payout(payout)
+                    .hit(true)
+                    .build();
+        }
+    }
+
+    private Map<String,BetResult> betRace(String key, BetResult betResult, Confident confident, Race race) {
+        Map<String,BetResult> results = new HashMap<>();
+        results.put(key + " レース:全部",betResult);
+        results.put(key + " レース:買い ",confident.isBuyFlag() ?  betResult : null);
+        results.put(key + " レース:自信 ",confident.isConfidentFlag() ? betResult : null);
+        results.put(key + " レース:カオス ",confident.isChaosFlag() ? betResult : null);
+//        results.put(key + " レース:2歳 ", Objects.equals(race.getOldLimit(), "2歳") ? betResult : null);
+//        results.put(key + " レース:3歳 ", Objects.equals(race.getOldLimit(), "3歳") ? betResult : null);
+//        results.put(key + " レース:3歳以上 ",Objects.equals(race.getOldLimit(), "3歳以上") ? betResult : null);
+//        results.put(key + " レース:4歳以上 ",Objects.equals(race.getOldLimit(), "4歳以上") ? betResult : null);
+//        results.put(key + " レース:買い,2歳 ",confident.isBuyFlag() && Objects.equals(race.getOldLimit(), "2歳") ?  betResult : null);
+//        results.put(key + " レース:買い,3歳 ",confident.isBuyFlag() && Objects.equals(race.getOldLimit(), "3歳") ?  betResult : null);
+//        results.put(key + " レース:買い,3歳以上 ",confident.isBuyFlag() && Objects.equals(race.getOldLimit(), "3歳以上") ?  betResult : null);
+//        results.put(key + " レース:買い,4歳以上 ",confident.isBuyFlag() && Objects.equals(race.getOldLimit(), "4歳以上") ?  betResult : null);
+//        results.put(key + " レース:自信,2歳 ",confident.isConfidentFlag() && Objects.equals(race.getOldLimit(), "2歳") ?  betResult : null);
+//        results.put(key + " レース:自信,3歳 ",confident.isConfidentFlag() && Objects.equals(race.getOldLimit(), "3歳") ?  betResult : null);
+//        results.put(key + " レース:自信,3歳以上 ",confident.isConfidentFlag() && Objects.equals(race.getOldLimit(), "3歳以上") ?  betResult : null);
+//        results.put(key + " レース:自信,4歳以上 ",confident.isConfidentFlag() && Objects.equals(race.getOldLimit(), "4歳以上") ?  betResult : null);
+//        results.put(key + " レース:カオス,2歳 ",confident.isChaosFlag() && Objects.equals(race.getOldLimit(), "2歳") ?  betResult : null);
+//        results.put(key + " レース:カオス,3歳 ",confident.isChaosFlag() && Objects.equals(race.getOldLimit(), "3歳") ?  betResult : null);
+//        results.put(key + " レース:カオス,3歳以上 ",confident.isChaosFlag() && Objects.equals(race.getOldLimit(), "3歳以上") ?  betResult : null);
+//        results.put(key + " レース:カオス,4歳以上 ",confident.isChaosFlag() && Objects.equals(race.getOldLimit(), "4歳以上") ?  betResult : null);
+        return results;
     }
 
     /**
@@ -103,7 +212,7 @@ public class BetService {
      * @param horseScores
      * @return
      */
-    private List<Integer> betMaxExpect(List<RaceHorse> raceHorses, List<HorseScore> horseScores) {
+    private List<Integer> betMaxExpect(List<RaceHorse> raceHorses, List<HorseScore> horseScores,float limitExpect) {
         Map<Integer,Double> horseExpects = getHorseExpects(raceHorses,horseScores);
 
         Integer buyHorse = null;
@@ -114,7 +223,7 @@ public class BetService {
                 maxExpect = horseExpect.getValue();
             }
         }
-        if ( maxExpect >= 1 ) {
+        if ( maxExpect >= limitExpect ) {
             return Arrays.asList(buyHorse);
         } else {
             return new ArrayList<>();
@@ -128,12 +237,12 @@ public class BetService {
      * @param horseScores
      * @return
      */
-    private List<Integer> betExpectOverOne(List<RaceHorse> raceHorses, List<HorseScore> horseScores) {
+    private List<Integer> betExpectOver(List<RaceHorse> raceHorses, List<HorseScore> horseScores, float limit) {
         Map<Integer,Double> horseExpects = getHorseExpects(raceHorses,horseScores);
 
         List<Integer> buyHorseIds = new ArrayList<>();
         for (Map.Entry<Integer,Double> horseExpect : horseExpects.entrySet()) {
-            if(horseExpect.getValue() >= 1) {
+            if(horseExpect.getValue() >= limit) {
                 buyHorseIds.add(horseExpect.getKey());
             }
         }
@@ -153,5 +262,10 @@ public class BetService {
         }));
 
         return horseExpects;
+    }
+
+    private Map<String,BetResult> mergeMap(Map<String,BetResult> map1, Map<String,BetResult> map2) {
+        map1.putAll(map2);
+        return map1;
     }
 }

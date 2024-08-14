@@ -4,9 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.example.valueobject.*;
 
-import java.util.Date;
 import java.util.List;
 
 @Data
@@ -19,5 +17,7 @@ public class Race {
     Integer id;
     Integer round;
     String stadium;
+    String oldLimit;
     List<RaceHorse> raceHorses;
+    List<Payout> payouts;
 }

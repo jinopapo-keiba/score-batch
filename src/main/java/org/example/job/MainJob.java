@@ -58,6 +58,7 @@ public class MainJob implements CommandLineRunner {
                     .toList()
                     .size();
             double totalPayout= betResults.stream().mapToDouble(BetResult::getPayout).sum();
+            log.info(resultEntry.getKey() + "合計:" + betResults.size());
             log.info(resultEntry.getKey() + "的中率:" + (double) hitCount / betResults.size());
             log.info(resultEntry.getKey() + "期待値:" + totalPayout / betResults.size());
         }
