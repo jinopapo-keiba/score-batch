@@ -23,7 +23,7 @@ public class RaceRepository {
         Map<String,String> param = new HashMap<>();
         param.put("raceId",String.valueOf(raceId));
         param.put("beforeFlag","true");
-        ResponseEntity<List<Race>> response = restTemplate.exchange("http://localhost:8080/v1/race?beforeFlag=false&raceId="+ raceId, HttpMethod.GET,null, new ParameterizedTypeReference<>() {},param);
+        ResponseEntity<List<Race>> response = restTemplate.exchange("http://localhost:8080/v1/race?beforeFlag=false&payoutFlag=true&raceId="+ raceId, HttpMethod.GET,null, new ParameterizedTypeReference<>() {},param);
 
         return response.getBody().get(0);
     }
