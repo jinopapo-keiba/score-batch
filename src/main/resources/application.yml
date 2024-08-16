@@ -3,6 +3,11 @@ spring:
     driverClassName: com.mysql.jdbc.Driver
     url: jdbc:mysql://localhost/keiba
     username: ji-no
+  redis:
+    host: localhost
+    port: 6379
+  cache:
+    type: redis
 server:
   port: 8081
 logging:
@@ -11,3 +16,4 @@ logging:
       springframework: WARN
 mybatis:
   configLocation: classpath:/mybatis/mybatis-config.xml
+

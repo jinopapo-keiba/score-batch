@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import org.example.entity.HorseScore;
 import org.example.repository.dto.HorseScoreResponse;
 import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +21,7 @@ import java.util.Objects;
 public class ScoreRepository {
    private final RestTemplateBuilder restTemplateBuilder;
 
+   @Cacheable("score")
    public HorseScoreResponse fetchScore(int raceId) {
        RestTemplate restTemplate = restTemplateBuilder.build();
        Map<String,Object> param = new HashMap<>();

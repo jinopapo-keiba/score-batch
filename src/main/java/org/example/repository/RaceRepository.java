@@ -3,6 +3,7 @@ package org.example.repository;
 import lombok.AllArgsConstructor;
 import org.example.entity.Race;
 import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +19,7 @@ import java.util.Map;
 public class RaceRepository {
     private final RestTemplateBuilder restTemplateBuilder;
 
+    @Cacheable("race")
     public Race fetchRace(int raceId) {
         RestTemplate restTemplate = restTemplateBuilder.build();
         Map<String,String> param = new HashMap<>();

@@ -36,6 +36,7 @@ public class BetService {
         results = mergeMap(results,betRace("単勝：最大期待値",judgeTanshou(raceHorses,betMaxExpect(raceHorses,scores,1)),confident,race));
         results = mergeMap(results,betRace("単勝：最大期待値(1.5)",judgeTanshou(raceHorses,betMaxExpect(raceHorses,scores,1.5F)),confident,race));
         results = mergeMap(results,betRace("単勝：最大期待値(2)",judgeTanshou(raceHorses,betMaxExpect(raceHorses,scores,2)),confident,race));
+        results = mergeMap(results,betRace("複勝：Best3スコア",judgeHukushou(raceHorses,betBest3Score(raceHorses,scores),race.getPayouts()),confident,race));
         results = mergeMap(results,betRace("複勝：最大スコア",judgeHukushou(raceHorses,betMaxScore(raceHorses,scores),race.getPayouts()),confident,race));
         results = mergeMap(results,betRace("複勝：最大期待値",judgeHukushou(raceHorses,betMaxExpect(raceHorses,scores,1),race.getPayouts()),confident,race));
         results = mergeMap(results,betRace("複勝：最大期待値(1.5)",judgeHukushou(raceHorses,betMaxExpect(raceHorses,scores,1.5F),race.getPayouts()),confident,race));
@@ -46,6 +47,8 @@ public class BetService {
         results = mergeMap(results,betRace("ワイド：軸：最大スコア 紐：期待値1以上",judgeWide(raceHorses,betMaxScore(raceHorses,scores),betExpectOver(raceHorses,scores,1),race.getPayouts()),confident,race));
         results = mergeMap(results,betRace("ワイド：軸：最大スコア 紐：期待値1.5以上",judgeWide(raceHorses,betMaxScore(raceHorses,scores),betExpectOver(raceHorses,scores,1.5F),race.getPayouts()),confident,race));
         results = mergeMap(results,betRace("ワイド：軸：最大スコア 紐：期待値2以上)",judgeWide(raceHorses,betMaxScore(raceHorses,scores),betExpectOver(raceHorses,scores,2),race.getPayouts()),confident,race));
+        results = mergeMap(results,betRace("ワイド：軸：最大スコア 紐：Best3スコア",judgeWide(raceHorses,betMaxScore(raceHorses,scores),betBest3Score(raceHorses,scores),race.getPayouts()),confident,race));
+
         return results;
     }
 
@@ -109,14 +112,16 @@ public class BetService {
     }
 
     private BetResult judgeWide(List<RaceHorse> raceHorses, List<Integer> jikuBetHorseIds,List<Integer> himoBetHorseIds,List<Payout> payouts) {
-        if (jikuBetHorseIds.isEmpty() || himoBetHorseIds.isEmpty()) {
+        List<Integer> distinctHimoHorseIds = himoBetHorseIds.stream().filter(himoBetHorseId -> !jikuBetHorseIds.contains(himoBetHorseId)).toList();
+
+        if (jikuBetHorseIds.isEmpty() || distinctHimoHorseIds.isEmpty()) {
             return null;
         }
 
         List<Integer> jikuFrameNumber = jikuBetHorseIds.stream().map(
                         betHorseId -> raceHorses.stream().filter(raceHorse -> Objects.equals(raceHorse.getHorse().getId(), betHorseId)).findFirst().get().getFrameNumber())
                 .toList();
-        List<Integer> himoFrameNumber = himoBetHorseIds.stream().map(
+        List<Integer> himoFrameNumber = distinctHimoHorseIds.stream().map(
                         betHorseId -> raceHorses.stream().filter(raceHorse -> Objects.equals(raceHorse.getHorse().getId(), betHorseId)).findFirst().get().getFrameNumber())
                 .toList();
 
